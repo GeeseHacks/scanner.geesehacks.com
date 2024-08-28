@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import jsQR from 'jsqr';
 
 const QRCodeScanner: React.FC = () => {
@@ -8,20 +8,23 @@ const QRCodeScanner: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const startScanner = useCallback(async () => {
+  useEffect(() => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play();
-          requestAnimationFrame(tick);
+        const init = async () => {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+            videoRef.current.play();
+            requestAnimationFrame(tick);
+          }
         }
+        init();
       } catch (error) {
         console.error('Error accessing camera:', error);
       }
     }
-  }, []);
+  }, [])
 
   const tick = useCallback(() => {
     if (videoRef.current && canvasRef.current) {
@@ -51,9 +54,6 @@ const QRCodeScanner: React.FC = () => {
   return (
     <div>
       <h2 className="text-xl font-semibold mb-2">Scan QR Code</h2>
-      <button onClick={startScanner} className="bg-blue-500 text-white px-4 py-2 rounded mb-4">
-        Start Scanner
-      </button>
       <div>
         <video ref={videoRef} className="hidden" />
         <canvas ref={canvasRef} className="border" />

@@ -5,7 +5,7 @@ import QRCodeScanner from './components/scanner';
 export default function Home() {
   return (
     <>
-      <QRCodeGenerator />
+      {/* <QRCodeGenerator /> */}
       <QRCodeScanner />
     </>
   );
