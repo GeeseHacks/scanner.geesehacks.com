@@ -1,7 +1,7 @@
 import Image from "next/image";
 import QRCodeGenerator from '../components/Generator';
 import QRCodeScanner from '../components/Scanner';
-import Schedule from "@/components/schedule";
+import Schedule from "@/components/Schedule";
 
 export default function Home() {
   return (
