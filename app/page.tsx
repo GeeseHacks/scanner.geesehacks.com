@@ -1,12 +1,14 @@
 import Image from "next/image";
-import QRCodeGenerator from './components/generator';
-import QRCodeScanner from './components/scanner';
+import QRCodeGenerator from '../components/Generator';
+import QRCodeScanner from '../components/Scanner';
+import Schedule from "@/components/schedule";
 
 export default function Home() {
   return (
-    <>
-      {/* <QRCodeGenerator /> */}
-      <QRCodeScanner />
-    </>
+    <div>
+      {/* TODO: Warn if not using phone */}
+      {/* <QRCodeScanner /> */}
+      <Schedule />
+    </div>
   );
 }
