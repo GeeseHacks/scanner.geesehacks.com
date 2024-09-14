@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
 
-const profileUrl = 'https://somesite.com/user';
+const profileUrl = 'https://geesehacks.com/user';
 
 const QRCodeGenerator: React.FC = () => {
   const [userId, setUserId] = useState('');
