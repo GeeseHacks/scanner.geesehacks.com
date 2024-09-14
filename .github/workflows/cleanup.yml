@@ -1,0 +1,71 @@
+name: Cleanup Old Deployments
+
+env:
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Runs every Sunday at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Clean up old deployments
+        run: |
+          # Define the age limit (in days)
+          AGE_LIMIT_DAYS=7
+
+          # Get the current date in seconds since epoch
+          current_date=$(date +%s)
+
+          echo "Fetching the most recent production deployment..."
+          # Get the URL of the most recent production deployment
+          current_prod_deployment_url=$(curl -s -X GET "https://api.vercel.com/v6/deployments?projectId=$VERCEL_PROJECT_ID" -H "Authorization: Bearer $VERCEL_TOKEN" | jq -r '.deployments[] | select(.target == "production" and .state == "READY") | .url' | head -n 1)
+
+          echo "Current production deployment URL: $current_prod_deployment_url"
+
+          echo "Fetching the list of all deployments..."
+          # Get the list of all deployments with their creation times
+          deployments=$(curl -s -X GET "https://api.vercel.com/v6/deployments?projectId=$VERCEL_PROJECT_ID&limit=50" -H "Authorization: Bearer $VERCEL_TOKEN" | jq -r '.deployments[] | "\(.uid) \(.createdAt) \(.url) \(.target)"')
+
+          # Convert deployments list to an array
+          readarray -t deployments_array <<< "$deployments"
+
+          echo "Total deployments fetched: ${#deployments_array[@]}"
+
+          # Iterate over the deployments
+          for deployment in "${deployments_array[@]}"; do
+            uid=$(echo $deployment | awk '{print $1}')
+            created_at=$(echo $deployment | awk '{print $2}')
+            url=$(echo $deployment | awk '{print $3}')
+            target=$(echo $deployment | awk '{print $4}')
+            
+            # Calculate the deployment age in days
+            deployment_age_days=$(( (current_date - (created_at / 1000)) / 86400 ))
+
+            # Debug logs
+            echo "Processing deployment:"
+            echo "  UID: $uid"
+            echo "  Created At: $created_at"
+            echo "  URL: $url"
+            echo "  Target: $target"
+            echo "  Age (days): $deployment_age_days"
+
+            # Delete the deployment if it is older than the age limit and not the current production deployment
+            if [ $deployment_age_days -gt $AGE_LIMIT_DAYS ] && [ "$url" != "$current_prod_deployment_url" ]; then
+              echo "Deleting deployment: $uid (Age: $deployment_age_days days, Target: $target, URL: $url)"
+              curl -s -X DELETE "https://api.vercel.com/v6/deployments/$uid" -H "Authorization: Bearer $VERCEL_TOKEN"
+            else
+              echo "Keeping deployment: $uid (Age: $deployment_age_days days, Target: $target, URL: $url)"
+            fi
+          done
