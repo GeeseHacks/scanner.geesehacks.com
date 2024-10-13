@@ -3,73 +3,141 @@ generator client {
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
-
 datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL")
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
 }
 
 model User {
-  id                         Int                     @id
-  firstname                  String                  @db.VarChar(50)
-  lastname                   String                  @db.VarChar(50)
+  id                         String                @id @db.VarChar(36)
+  firstname                  String                @db.VarChar(50)
+  lastname                   String                @db.VarChar(50)
   age                        Int
-  email                      String                  @unique @db.VarChar(100)
-  phone_number               String                  @db.VarChar(20)
-  school                     String                  @db.VarChar(100)
-  level_of_study             String                  @db.VarChar(100)
-  country_of_residence       String                  @db.VarChar(255)
-  address                    String?                 @db.VarChar(255)
-  dietary_restrictions       String                  @db.VarChar(100)
-  github                     String?                 @db.VarChar(255)
-  linkedin                   String?                 @db.VarChar(255)
-  personal_website           String?                 @db.VarChar(255)
+  email                      String                @unique @db.VarChar(100)
+  phone_number               String                @db.VarChar(20)
+  school                     String                @db.VarChar(100)
+  level_of_study             String                @db.VarChar(100)
+  country_of_residence       String                @db.VarChar(255)
+  address                    String?               @db.VarChar(255)
+  dietary_restrictions       String                @db.VarChar(100)
+  github                     String?               @db.VarChar(255)
+  linkedin                   String?               @db.VarChar(255)
+  personal_website           String?               @db.VarChar(255)
   MLH_authorize              Boolean?
-  field_of_study             String                  @db.VarChar(100)
-  optional_consider          String?                 @db.VarChar(255)
-  optional_gender            String?                 @db.VarChar(50)
-  optional_pronouns          String?                 @db.VarChar(50)
-  optional_race              String?                 @db.VarChar(50)
+  field_of_study             String                @db.VarChar(100)
+  optional_consider          String?               @db.VarChar(255)
+  optional_gender            String?               @db.VarChar(50)
+  optional_pronouns          String?               @db.VarChar(50)
+  optional_race              String?               @db.VarChar(50)
   optional_underrepresented  String?
-  other_dietary_restrictions String?                 @db.VarChar(100)
-  resume                     String?                 @db.VarChar(255)
-  t_shirt_size               String?                 @db.VarChar(50)
+  other_dietary_restrictions String?               @db.VarChar(100)
+  resume                     String?               @db.VarChar(255)
+  t_shirt_size               String?               @db.VarChar(50)
   status                     UserStatus
+  application_responses      ApplicationResponse[]
+  qrCodes                    QRCodeRegistered[]
+}
 
+model ApplicationResponse {
+  id     String @id @db.VarChar(36)
+  userid String
+  q1     String @db.VarChar(1000)
+  q2     String @db.VarChar(1000)
+  q3     String @db.VarChar(1000)
+  user   User   @relation(fields: [userid], references: [id])
 
-  application_responses      ApplicationResponse[] // Define the relation to application_responses -- Not an actual field in the DB schema
-  qrCodes QRCodeRegistered[] // User can have multiple QR Codes
+  @@index([userid])
+}
+
+model UserAuth {
+  id              String    @id @db.VarChar(36)
+  email           String    @unique @db.VarChar(100)
+  password        String    @db.VarChar(60)
+  resetToken      String?   @db.VarChar(255)
+  tokenExpiration DateTime?
+}
+
+model QRCodeRegistered {
+  qrCodeId String @id @db.VarChar(255)
+  userid   String
+  user     User   @relation(fields: [userid], references: [id])
+
+  @@index([userid])
+}
+
+model EventParticipation {
+  id        Int     @id @default(autoincrement())
+  eventName String  @db.VarChar(255)
+  projectId Int
+  amount    Int     @default(0)
+  Project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model Investment {
+  id        Int      @id @default(autoincrement())
+  amount    Int
+  judgeId   Int
+  projectId Int
+  createdAt DateTime @default(now())
+  Judge     Judge    @relation(fields: [judgeId], references: [id], onDelete: Cascade)
+  Project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([judgeId])
+  @@index([projectId])
+}
+
+model Judge {
+  id                                          Int          @id @default(autoincrement())
+  name                                        String       @db.VarChar(255)
+  company                                     String?      @db.VarChar(255)
+  isGuest                                     Boolean      @default(false)
+  availableFunds                              Int          @default(10000)
+  Investment                                  Investment[]
+  JudgePair_JudgePair_primaryJudgeIdToJudge   JudgePair[]  @relation("JudgePair_primaryJudgeIdToJudge")
+  JudgePair_JudgePair_secondaryJudgeIdToJudge JudgePair[]  @relation("JudgePair_secondaryJudgeIdToJudge")
+
+  @@index([name])
+}
+
+model JudgePair {
+  id                                      Int       @id @default(autoincrement())
+  primaryJudgeId                          Int
+  secondaryJudgeId                        Int
+  Judge_JudgePair_primaryJudgeIdToJudge   Judge     @relation("JudgePair_primaryJudgeIdToJudge", fields: [primaryJudgeId], references: [id], onDelete: Cascade)
+  Judge_JudgePair_secondaryJudgeIdToJudge Judge     @relation("JudgePair_secondaryJudgeIdToJudge", fields: [secondaryJudgeId], references: [id], onDelete: Cascade)
+  Project                                 Project[] @relation("JudgePairTeams")
+
+  @@unique([primaryJudgeId, secondaryJudgeId])
+}
+
+model Project {
+  id                 Int                  @id @default(autoincrement())
+  name               String               @db.VarChar(255)
+  totalInvestment    Int                  @default(0)
+  EventParticipation EventParticipation[]
+  Investment         Investment[]
+  Tag                Tag[]
+  JudgePair          JudgePair[]          @relation("JudgePairTeams")
+
+  @@index([name])
+}
+
+model Tag {
+  id        Int     @id @default(autoincrement())
+  name      String  @db.VarChar(50)
+  color     String  @db.VarChar(7)
+  projectId Int
+  Project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
 }
 
 enum UserStatus {
   ACCEPTED
   REJECTED
   WAITLIST
-  APPLIED
   NOT_APPLIED
-}
-
-model ApplicationResponse {
-  id     Int    @id @default(autoincrement())
-  userid Int
-  q1     String @db.VarChar(1000)
-  q2     String @db.VarChar(1000)
-  q3     String @db.VarChar(1000)
-  user   User  @relation(fields: [userid], references: [id])
-
-  @@index([userid])
-}
-
-model UserAuth {
-  id       Int    @id @default(autoincrement())
-  email    String @unique @db.VarChar(100)
-  password String @db.VarChar(60)
-}
-
-model QRCodeRegistered {
-  qrCodeId  String @id @db.VarChar(255)
-  userid    Int
-  user      User   @relation(fields: [userid], references: [id])
-
-  @@index([userid])
+  APPLIED
 }
