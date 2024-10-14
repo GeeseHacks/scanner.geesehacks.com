@@ -5,9 +5,15 @@ import { HackerEvent } from '@/types/hackerEvent';
 // Define the GET API route handler
 export async function GET() {
   try {
+
     // Auth
     const auth = new google.auth.GoogleAuth({
+      projectId: process.env.GOOGLE_PROJECT_ID,
       scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+      credentials: {
+        client_email: process.env.GOOGLE_CLIENT_EMAIL,
+        private_key: process.env.GOOGLE_PRIVATE_KEY
+      }
     });
     const sheets = google.sheets({ version: 'v4', auth });
 
