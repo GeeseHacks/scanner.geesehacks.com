@@ -1,14 +1,13 @@
-import Image from "next/image";
-import QRCodeGenerator from '../components/Generator';
-import QRCodeScanner from '../components/Scanner';
-import Schedule from "@/components/Schedule";
+import EventCards from "@/components/EventCards";
 
 export default function Home() {
   return (
     <div>
       {/* TODO: Warn if not using phone */}
-      {/* <QRCodeScanner /> */}
-      <Schedule />
+      <h1 className="text-center text-4xl font-md my-8">
+        GeeseHacks ID Scanner
+      </h1>
+      <EventCards />
     </div>
   );
 }
