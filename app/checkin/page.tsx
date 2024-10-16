@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
 import QRCodeScanner from "@/components/Scanner";
-import { set } from "zod";
 
 interface HackerInfo {
   id: string;
@@ -27,7 +26,6 @@ type Stage =
 export default function Checkin() {
   const [email, setEmail] = useState<string>("");
   const [hackerInfo, setHackerInfo] = useState<HackerInfo | null>(null);
-  const [isConfirmed, setIsConfirmed] = useState<boolean>(false);
   const [eventCode, setEventCode] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [warnings, setWarnings] = useState<string[]>([]); // Changed to an array of strings
@@ -132,25 +130,26 @@ export default function Checkin() {
   };
 
   // Handle user confirmation
-  const handleYesConfirmation = (): void => {
-    setIsConfirmed(true);
+  const moveToAssignmentScanning = (): void => {
     setError("");
     setStage("assignment_scanning"); // Move to assignment_scanning stage
   };
 
-  // Handle rejection and go back to checkin_scanning
-  const handleNoRejection = (): void => {
-    setEmail(""); // Clear the email
-    setHackerInfo(null); // Reset hacker info
-    setWarnings([]); // Clear warnings when rejecting
-    setStage("checkin_scanning"); // Go back to checkin_scanning stage
+  const confirmOverwriteEventQRCode = (): void => {
+    setError(""); // Clear any existing errors
+    setStage("assignment_scanning"); // Move to assignment_scanning stage
+
+    if (hackerInfo && eventCode) {
+      setStage("success"); // Move to assignment_scanning stage
+      // Call the function to save the event QR code to the database
+      saveEventQRCodeToDatabase(eventCode, hackerInfo.email);
+    }
   };
 
   // Function to reset the state back to checkin_scanning
   const resetCheckin = (): void => {
     setEmail(""); // Clear the email
     setHackerInfo(null); // Reset hacker info
-    setIsConfirmed(false); // Reset confirmation state
     setEventCode(""); // Clear the event code
     setWarnings([]); // Clear warnings
     setError(""); // Clear any errors
@@ -244,7 +243,7 @@ export default function Checkin() {
             <div className="flex flex-row gap-4 w-full justify-center mt-4 border-4">
               <Button
                 className="w-full h-12"
-                onClick={handleNoRejection}
+                onClick={resetCheckin}
                 variant="outline"
                 size="icon"
               >
@@ -252,7 +251,7 @@ export default function Checkin() {
               </Button>
               <Button
                 className="w-full h-12"
-                onClick={handleYesConfirmation}
+                onClick={moveToAssignmentScanning}
                 variant="outline"
                 size="icon"
                 disabled={error != ""}
@@ -264,7 +263,7 @@ export default function Checkin() {
         </div>
       )}
 
-      {stage === "assignment_scanning" && isConfirmed && (
+      {stage === "assignment_scanning" && (
         <QRCodeScanner
           setScannedData={handleEventQRScan}
           title={"Scan Event QR Code"}
@@ -277,7 +276,22 @@ export default function Checkin() {
             <CardContent>
               <div className="mt-6">
                 <p className="text-lg text-gray-400">Scanned Event Code</p>
-                <h2 className="text-2xl">{eventCode ? eventCode : "Null"}</h2>
+                <h2 className="text-3xl">
+                {eventCode.startsWith(
+                    "https://portal.geesehacks.com/user/"
+                  ) ? (
+                    <div className="flex flex-col">
+                      <p className="text-lg">{`https://portal.geesehacks.com/user/`}</p>
+                      <h2>
+                        {eventCode.slice(
+                          "https://portal.geesehacks.com/user/".length
+                        )}
+                      </h2>
+                    </div>
+                  ) : (
+                    "Invalid Event Code"
+                  )}
+                </h2>
               </div>
             </CardContent>
           </Card>
@@ -312,7 +326,7 @@ export default function Checkin() {
             <div className="flex flex-row gap-4 w-full justify-center mt-4 border-4">
               <Button
                 className="w-full h-12"
-                onClick={handleNoRejection}
+                onClick={resetCheckin}
                 variant="outline"
                 size="icon"
               >
@@ -320,7 +334,7 @@ export default function Checkin() {
               </Button>
               <Button
                 className="w-full h-12"
-                onClick={handleYesConfirmation}
+                onClick={confirmOverwriteEventQRCode}
                 variant="outline"
                 size="icon"
                 disabled={error != ""}
@@ -364,7 +378,22 @@ export default function Checkin() {
 
                 <div>
                   <p className="text-lg text-gray-400">Scanned Event Code</p>
-                  <h2 className="text-3xl">{eventCode}</h2>
+                  <h2 className="text-3xl">
+                    {eventCode.startsWith(
+                      "https://portal.geesehacks.com/user/"
+                    ) ? (
+                      <div className="flex flex-col">
+                        <p className="text-lg">{`https://portal.geesehacks.com/user/`}</p>
+                        <h2>
+                          {eventCode.slice(
+                            "https://portal.geesehacks.com/user/".length
+                          )}
+                        </h2>
+                      </div>
+                    ) : (
+                      "Invalid Event Code"
+                    )}
+                  </h2>
                 </div>
               </div>
             </CardContent>

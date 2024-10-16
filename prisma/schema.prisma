@@ -35,7 +35,8 @@ model User {
   t_shirt_size               String?               @db.VarChar(50)
   status                     UserStatus
   application_responses      ApplicationResponse[]
-  event_qr_code              String?               @db.VarChar(255)
+  event_qr_code              String?               @unique @db.VarChar(255)
+  attendedEventIds           Json?                 // Store attended event IDs as a JSON array
 }
 
 model ApplicationResponse {
