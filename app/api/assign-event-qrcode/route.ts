@@ -5,7 +5,9 @@ import { z } from 'zod';
 // Define the input schema using Zod
 const assignEventSchema = z.object({
   email: z.string().email(), // Validate that the input is a valid email
-  qrCode: z.string(), // Validate that the QR code is a string
+  qrCode: z.string().refine((code) => code.startsWith('https://portal.geesehacks.com/user/'), {
+    message: 'QR code must start with https://portal.geesehacks.com/user/',
+  }), // Validate that the QR code starts with the specified URL
 });
 
 export async function POST(request: NextRequest) {
@@ -19,12 +21,13 @@ export async function POST(request: NextRequest) {
 
     // If validation fails, return a 400 error with validation details
     if (!validationResult.success) {
-        console.log(validationResult.error.errors);
+      console.log(validationResult.error.errors);
       return new NextResponse(JSON.stringify({ error: validationResult.error.errors }), { status: 400 });
     }
 
     const { email, qrCode } = validationResult.data;
-
+    console.log("Validation passed", email, qrCode);
+    
     // Find the user by email using Prisma
     const user = await prisma.user.findUnique({
       where: { email },

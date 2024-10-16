@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
 import QRCodeScanner from "@/components/Scanner";
+import { set } from "zod";
 
 interface HackerInfo {
   id: string;
@@ -66,24 +67,40 @@ export default function Checkin() {
         }
 
         setWarnings(newWarnings); // Set the warnings array
-        setStage("verify"); // Move to verify stage once data is fetched
-      } else {
+      } else if (response.status === 404) {
         setError("Hacker not found");
         setHackerInfo(null);
-        setStage("checkin_scanning"); // Go back to checkin_scanning stage if no user found
+      } else if (response.status === 400) {
+        setError("Scanned QR Code is not an email");
+        setHackerInfo(null);
       }
+      setStage("verify");
     } catch (error) {
       setError("Error fetching hacker information.");
       console.error(error);
-      setStage("checkin_scanning"); // Reset to checkin_scanning if there's an error
+      setStage("checkin_scanning");
     }
+  };
+
+  // Perform the QR code validation
+  const validateQRCode = (qrCode: string): boolean => {
+    return qrCode.startsWith("https://portal.geesehacks.com/user/");
   };
 
   // Handle the event QR scan and save it to the database
   const handleEventQRScan = (scannedEventCode: string): void => {
+    // Validate the scanned event code
+    if (!validateQRCode(scannedEventCode)) {
+      setError("Invalid QR Code");
+    }
     setEventCode(scannedEventCode);
-    if (hackerInfo?.email) {
-      saveEventQRCodeToDatabase(scannedEventCode, hackerInfo.email); // Use email instead of ID
+
+    if (error != "" || warnings.length > 0) {
+      setStage("assignment");
+    } else {
+      if (hackerInfo != null) {
+        saveEventQRCodeToDatabase(scannedEventCode, hackerInfo.email);
+      }
     }
   };
 
@@ -152,7 +169,7 @@ export default function Checkin() {
         />
       )}
 
-      {stage === "verify" && hackerInfo && (
+      {stage === "verify" && (
         <div className="w-full">
           <Card className="my-5">
             <CardHeader>
@@ -163,22 +180,34 @@ export default function Checkin() {
                 <div>
                   <p className="text-lg text-gray-400">Name</p>
                   <h2 className="text-3xl">
-                    {hackerInfo.firstname} {hackerInfo.lastname}
+                    {hackerInfo
+                      ? `${hackerInfo.firstname} ${hackerInfo.lastname}`
+                      : "Null"}
                   </h2>
                 </div>
                 <div>
                   <p className="text-lg text-gray-400">Email</p>
-                  <h2 className="text-3xl">{hackerInfo.email}</h2>
+                  <h2 className="text-3xl">
+                    {hackerInfo ? hackerInfo.email : "Null"}
+                  </h2>
                 </div>
 
                 <div>
                   <p className="text-lg text-gray-400">Application Status</p>
                   <h2
                     className={`text-3xl ${
-                      hackerInfo.accepted ? "text-green-500" : "text-red-500"
+                      hackerInfo
+                        ? hackerInfo.accepted
+                          ? "text-green-500"
+                          : "text-red-500"
+                        : "Null"
                     }`}
                   >
-                    {hackerInfo.accepted ? "Accepted" : "Rejected"}
+                    {hackerInfo
+                      ? hackerInfo.accepted
+                        ? "Accepted"
+                        : "Rejected"
+                      : "Null"}
                   </h2>
                 </div>
               </div>
@@ -201,6 +230,14 @@ export default function Checkin() {
             </div>
           )}
 
+          {error != "" && (
+            <div className="flex flex-col gap-4 my-4">
+              <div className="bg-red-200 text-red-800 p-4 rounded-md text-center">
+                ❌ {error} ❌
+              </div>
+            </div>
+          )}
+
           {/* Two buttons for Yes/No confirmation */}
           <div className="flex flex-col">
             <p className="text-xl text-center">Confirm Hacker's Identity?</p>
@@ -218,6 +255,7 @@ export default function Checkin() {
                 onClick={handleYesConfirmation}
                 variant="outline"
                 size="icon"
+                disabled={error != ""}
               >
                 <Check className="h-4 w-4" />
               </Button>
@@ -231,6 +269,67 @@ export default function Checkin() {
           setScannedData={handleEventQRScan}
           title={"Scan Event QR Code"}
         />
+      )}
+
+      {stage === "assignment" && (
+        <div>
+          <Card className="my-5">
+            <CardContent>
+              <div className="mt-6">
+                <p className="text-lg text-gray-400">Scanned Event Code</p>
+                <h2 className="text-2xl">{eventCode ? eventCode : "Null"}</h2>
+              </div>
+            </CardContent>
+          </Card>
+
+          {error != "" && (
+            <div className="flex flex-col gap-4 my-4">
+              <div className="bg-red-200 text-red-800 p-4 rounded-md text-center">
+                ❌ {error} ❌
+              </div>
+            </div>
+          )}
+
+          {/* Warnings box for verification stage */}
+          {warnings.length > 0 && (
+            <div className="flex flex-col gap-4 my-4">
+              {" "}
+              {/* Container for spacing */}
+              {warnings.map((warning, index) => (
+                <div
+                  key={index}
+                  className="bg-yellow-200 text-yellow-800 p-4 rounded-md text-center"
+                >
+                  ⚠️ {warning} ⚠️ {/* Render each warning in its own box */}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Two buttons for Yes/No confirmation */}
+          <div className="flex flex-col">
+            <p className="text-xl text-center">Assign new event code anyway?</p>
+            <div className="flex flex-row gap-4 w-full justify-center mt-4 border-4">
+              <Button
+                className="w-full h-12"
+                onClick={handleNoRejection}
+                variant="outline"
+                size="icon"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+              <Button
+                className="w-full h-12"
+                onClick={handleYesConfirmation}
+                variant="outline"
+                size="icon"
+                disabled={error != ""}
+              >
+                <Check className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {stage === "success" && hackerInfo && eventCode && (
