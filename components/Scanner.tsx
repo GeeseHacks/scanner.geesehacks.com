@@ -1,10 +1,14 @@
 "use client";
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useRef, useCallback, useEffect } from 'react';
 import jsQR from 'jsqr';
 
-const QRCodeScanner: React.FC = () => {
-  const [scannedUserId, setScannedUserId] = useState('');
+interface QRCodeScannerProps {
+  setScannedData: (data: string) => void; // Function to update the scanned data in the parent component
+  title: string
+}
+
+const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ setScannedData, title }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -24,7 +28,7 @@ const QRCodeScanner: React.FC = () => {
         console.error('Error accessing camera:', error);
       }
     }
-  }, [])
+  }, []);
 
   const tick = useCallback(() => {
     if (videoRef.current && canvasRef.current) {
@@ -38,31 +42,25 @@ const QRCodeScanner: React.FC = () => {
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const code = jsQR(imageData.data, imageData.width, imageData.height);
-          if (code) {
-            const match = code.data.match(/https:\/\/somesite\.com\/user\/(\w+)/);
-            if (match && match[1]) {
-              setScannedUserId(match[1]);
-              return; // Stop scanning after successful read
-            }
+          if (code && code.data) {
+            setScannedData(code.data); // Write the scanned data to the parent state with any data
+            return; // Stop scanning after successful read
           }
         }
       }
       requestAnimationFrame(tick);
     }
-  }, []);
+  }, [setScannedData]);
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-2">Scan QR Code</h2>
-      <div>
+    <div className="w-full h-[full] flex flex-col justify-between">
+      <p className="text-center w-full py-3">{title}</p>
+
+      {/* <h2 className="text-xl font-semibold mb-2">Scan QR Code</h2> */}
+      <div className="h-[80vh] flex justify-center overflow-x-hidden">
         <video ref={videoRef} className="hidden" />
-        <canvas ref={canvasRef} className="border" />
+        <canvas ref={canvasRef} className="h-full" />
       </div>
-      {scannedUserId && (
-        <p className="mt-4">
-          Scanned User ID: <strong>{scannedUserId}</strong>
-        </p>
-      )}
     </div>
   );
 };

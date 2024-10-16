@@ -1,0 +1,290 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Check, X } from "lucide-react";
+import QRCodeScanner from "@/components/Scanner";
+
+interface HackerInfo {
+  id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  accepted: boolean;
+}
+
+// Define the different stages
+type Stage =
+  | "checkin_scanning"
+  | "querying"
+  | "verify"
+  | "assignment_scanning"
+  | "assignment"
+  | "success";
+
+export default function Checkin() {
+  const [email, setEmail] = useState<string>("");
+  const [hackerInfo, setHackerInfo] = useState<HackerInfo | null>(null);
+  const [isConfirmed, setIsConfirmed] = useState<boolean>(false);
+  const [eventCode, setEventCode] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [warnings, setWarnings] = useState<string[]>([]); // Changed to an array of strings
+  const [stage, setStage] = useState<Stage>("checkin_scanning"); // State to track the stage
+
+  // Fetch hacker info when email is updated
+  useEffect(() => {
+    if (email) {
+      setStage("querying"); // Enter querying stage when email is scanned
+      fetchHackerInfo(email);
+    }
+  }, [email]);
+
+  // Fetch hacker info from the database when email is scanned
+  const fetchHackerInfo = async (email: string): Promise<void> => {
+    try {
+      const response = await fetch(`/api/users/${encodeURIComponent(email)}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.status === 200) {
+        setHackerInfo(data);
+        setError("");
+
+        const newWarnings: string[] = []; // Create a new warnings array
+
+        if (!data.accepted) {
+          newWarnings.push("Warning: Hacker is not accepted.");
+        }
+        if (data.event_qr_code != null) {
+          newWarnings.push("Warning: Hacker already checked in.");
+        }
+
+        setWarnings(newWarnings); // Set the warnings array
+        setStage("verify"); // Move to verify stage once data is fetched
+      } else {
+        setError("Hacker not found");
+        setHackerInfo(null);
+        setStage("checkin_scanning"); // Go back to checkin_scanning stage if no user found
+      }
+    } catch (error) {
+      setError("Error fetching hacker information.");
+      console.error(error);
+      setStage("checkin_scanning"); // Reset to checkin_scanning if there's an error
+    }
+  };
+
+  // Handle the event QR scan and save it to the database
+  const handleEventQRScan = (scannedEventCode: string): void => {
+    setEventCode(scannedEventCode);
+    if (hackerInfo?.email) {
+      saveEventQRCodeToDatabase(scannedEventCode, hackerInfo.email); // Use email instead of ID
+    }
+  };
+
+  // Save the event association in the database using the hacker's email
+  const saveEventQRCodeToDatabase = async (
+    qrCode: string,
+    email: string
+  ): Promise<void> => {
+    try {
+      const response = await fetch("/api/assign-event-qrcode", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ qrCode, email }), // Pass email instead of ID
+      });
+
+      if (response.status === 200) {
+        setError("Event successfully associated with the hacker.");
+        setStage("success"); // Move to success stage upon successful API response
+      } else {
+        console.log(response);
+        setError("Error associating event with the hacker.");
+      }
+    } catch (error) {
+      setError("Error saving event data.");
+      console.error(error);
+    }
+  };
+
+  // Handle user confirmation
+  const handleYesConfirmation = (): void => {
+    setIsConfirmed(true);
+    setError("");
+    setStage("assignment_scanning"); // Move to assignment_scanning stage
+  };
+
+  // Handle rejection and go back to checkin_scanning
+  const handleNoRejection = (): void => {
+    setEmail(""); // Clear the email
+    setHackerInfo(null); // Reset hacker info
+    setWarnings([]); // Clear warnings when rejecting
+    setStage("checkin_scanning"); // Go back to checkin_scanning stage
+  };
+
+  // Function to reset the state back to checkin_scanning
+  const resetCheckin = (): void => {
+    setEmail(""); // Clear the email
+    setHackerInfo(null); // Reset hacker info
+    setIsConfirmed(false); // Reset confirmation state
+    setEventCode(""); // Clear the event code
+    setWarnings([]); // Clear warnings
+    setError(""); // Clear any errors
+    setStage("checkin_scanning"); // Set stage back to checkin_scanning
+  };
+
+  return (
+    <div className="h-screen w-full flex flex-col items-center p-4">
+      <h1 className="text-3xl pt-4">Hacker Check-in</h1>
+
+      {/* QR Code Scanner is shown only in the checkin_scanning or assignment_scanning stage */}
+      {stage === "checkin_scanning" && (
+        <QRCodeScanner
+          setScannedData={setEmail}
+          title={"Scan Check-in QR Code"}
+        />
+      )}
+
+      {stage === "verify" && hackerInfo && (
+        <div className="w-full">
+          <Card className="my-5">
+            <CardHeader>
+              <h1 className="text-xl text-center">Hacker Info</h1>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <p className="text-lg text-gray-400">Name</p>
+                  <h2 className="text-3xl">
+                    {hackerInfo.firstname} {hackerInfo.lastname}
+                  </h2>
+                </div>
+                <div>
+                  <p className="text-lg text-gray-400">Email</p>
+                  <h2 className="text-3xl">{hackerInfo.email}</h2>
+                </div>
+
+                <div>
+                  <p className="text-lg text-gray-400">Application Status</p>
+                  <h2
+                    className={`text-3xl ${
+                      hackerInfo.accepted ? "text-green-500" : "text-red-500"
+                    }`}
+                  >
+                    {hackerInfo.accepted ? "Accepted" : "Rejected"}
+                  </h2>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Warnings box for verification stage */}
+          {warnings.length > 0 && (
+            <div className="flex flex-col gap-4 my-4">
+              {" "}
+              {/* Container for spacing */}
+              {warnings.map((warning, index) => (
+                <div
+                  key={index}
+                  className="bg-yellow-200 text-yellow-800 p-4 rounded-md text-center"
+                >
+                  ⚠️ {warning} ⚠️ {/* Render each warning in its own box */}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Two buttons for Yes/No confirmation */}
+          <div className="flex flex-col">
+            <p className="text-xl text-center">Confirm Hacker's Identity?</p>
+            <div className="flex flex-row gap-4 w-full justify-center mt-4 border-4">
+              <Button
+                className="w-full h-12"
+                onClick={handleNoRejection}
+                variant="outline"
+                size="icon"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+              <Button
+                className="w-full h-12"
+                onClick={handleYesConfirmation}
+                variant="outline"
+                size="icon"
+              >
+                <Check className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {stage === "assignment_scanning" && isConfirmed && (
+        <QRCodeScanner
+          setScannedData={handleEventQRScan}
+          title={"Scan Event QR Code"}
+        />
+      )}
+
+      {stage === "success" && hackerInfo && eventCode && (
+        <div>
+          <Card className="my-5">
+            <CardHeader>
+              <h1 className="text-xl text-center">Hacker Info</h1>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <p className="text-lg text-gray-400">Name</p>
+                  <h2 className="text-3xl">
+                    {hackerInfo.firstname} {hackerInfo.lastname}
+                  </h2>
+                </div>
+                <div>
+                  <p className="text-lg text-gray-400">Email</p>
+                  <h2 className="text-3xl">{hackerInfo.email}</h2>
+                </div>
+
+                <div>
+                  <p className="text-lg text-gray-400">Application Status</p>
+                  <h2
+                    className={`text-3xl ${
+                      hackerInfo.accepted ? "text-green-500" : "text-red-500"
+                    }`}
+                  >
+                    {hackerInfo.accepted ? "Accepted" : "Rejected"}
+                  </h2>
+                </div>
+
+                <div>
+                  <p className="text-lg text-gray-400">Scanned Event Code</p>
+                  <h2 className="text-3xl">{eventCode}</h2>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="bg-green-200 text-green-800 p-4 rounded-md text-center">
+            <h2>Success! Event QR code linked with the hacker.</h2>
+          </div>
+
+          <Button
+            className="w-full h-12 mt-5"
+            onClick={resetCheckin}
+            variant="outline"
+            size="icon"
+          >
+            <Check className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}

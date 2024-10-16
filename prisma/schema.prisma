@@ -35,7 +35,7 @@ model User {
   t_shirt_size               String?               @db.VarChar(50)
   status                     UserStatus
   application_responses      ApplicationResponse[]
-  qrCodes                    QRCodeRegistered[]
+  event_qr_code              String?               @db.VarChar(255)
 }
 
 model ApplicationResponse {
@@ -55,14 +55,6 @@ model UserAuth {
   password        String    @db.VarChar(60)
   resetToken      String?   @db.VarChar(255)
   tokenExpiration DateTime?
-}
-
-model QRCodeRegistered {
-  qrCodeId String @id @db.VarChar(255)
-  userid   String
-  user     User   @relation(fields: [userid], references: [id])
-
-  @@index([userid])
 }
 
 model EventParticipation {
