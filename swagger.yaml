@@ -1,0 +1,146 @@
+openapi: 3.0.0
+info:
+  title: Registration Portal API
+  version: 1.1.0
+  description: API Documentation for the Registration Portal
+servers:
+  - url: http://localhost:3000
+    description: Local server for development
+tags:
+  - name: users
+    description: User related endpoints
+  - name: qr-codes
+    description: QR Code registration related endpoints
+paths:
+  /api/assign-event-qrcode:
+    post:
+      tags:
+        - qr-codes
+      summary: Assign an event QR code to a user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: user@example.com
+                  description: User's email address
+                qrCode:
+                  type: string
+                  example: https://portal.geesehacks.com/user/12345
+                  description: QR code associated with the user
+      responses:
+        '200':
+          description: QR code assigned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    example: user@example.com
+                  event_qr_code:
+                    type: string
+                    example: https://portal.geesehacks.com/user/12345
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: QR code must start with https://portal.geesehacks.com/user/
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User not found
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: An error occurred while assigning the QR code
+
+  /api/users/{email}:
+    get:
+      tags:
+        - users
+      summary: Get user details by email
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+            example: user@example.com
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: The unique identifier for a user.
+                  firstname:
+                    type: string
+                    description: The user's first name.
+                  lastname:
+                    type: string
+                    description: The user's last name.
+                  email:
+                    type: string
+                    description: The user's email address.
+                  # Add additional user properties as needed
+        '400':
+          description: Invalid email format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid email format
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User not found
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Error fetching user
