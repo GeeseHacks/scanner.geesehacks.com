@@ -13,6 +13,8 @@ tags:
     description: QR Code registration related endpoints
   - name: events
     description: Event related endpoints
+  - name: scan-hacker
+    description: Scanning hacker events related endpoints
 paths:
   /api/assign-event-qrcode:
     post:
@@ -115,7 +117,6 @@ paths:
                   email:
                     type: string
                     description: The user's email address.
-                  # Add additional user properties as needed
         '400':
           description: Invalid email format
           content:
@@ -208,3 +209,84 @@ paths:
                   message:
                     type: string
                     example: Error fetching data
+
+  /api/scan-hacker:
+    post:
+      tags:
+        - scan-hacker
+      summary: Assign an event ID to a user based on QR code
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                qrCode:
+                  type: string
+                  example: https://portal.geesehacks.com/user/12345
+                  description: QR code associated with the user
+                eventId:
+                  type: string
+                  example: 'event-12345'
+                  description: The ID of the event to be assigned
+      responses:
+        '200':
+          description: Event ID assigned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: The unique identifier for the user.
+                  attendedEventIds:
+                    type: array
+                    items:
+                      type: string
+                    description: The list of event IDs attended by the user.
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: QR code must start with https://portal.geesehacks.com/user/
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User not found
+        '409':
+          description: Event ID already recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Event ID already recorded.
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: An error occurred while assigning the event ID
