@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, X, ChevronLeft } from "lucide-react";
+import { Check, X, House } from "lucide-react";
 import QRCodeScanner from "@/components/Scanner";
 import { useRouter } from "next/navigation";
 
@@ -165,12 +165,12 @@ export default function Checkin() {
   return (
     <div className="h-screen w-full flex flex-col items-center p-4">
       <Button
-        className="absolute top-5 left-4 bg-[#1c2d44]"
+        className="absolute top-4 left-4"
         onClick={handleBackButtonPress}
         variant="outline"
         size="icon"
       >
-        <ChevronLeft className="h-6 w-6 mr-1" />
+        <House className="h-5 w-5" />
       </Button>
 
       <h1 className="text-3xl pt-4">Hacker Check-in</h1>
@@ -186,7 +186,7 @@ export default function Checkin() {
       {stage === "verify" && (
         <div className="w-full h-full flex flex-col justify-between">
           <div>
-            <Card className="my-5">
+            <Card className="my-5 bg-[#1c2d44]">
               <CardHeader>
                 <h1 className="text-xl text-center">Hacker Info</h1>
               </CardHeader>
@@ -256,23 +256,21 @@ export default function Checkin() {
           {/* Two buttons for Yes/No confirmation */}
           <div className="flex flex-col">
             <p className="text-xl text-center">Confirm Hacker's Identity?</p>
-            <div className="flex flex-row gap-4 w-full justify-center mt-4 border-4">
+            <div className="flex flex-row gap-4 w-full justify-center mt-4">
               <Button
-                className="w-full h-12"
+                className="w-full h-12 bg-[#dc3545]"
                 onClick={resetCheckin}
-                variant="outline"
                 size="icon"
               >
-                <X className="h-4 w-4" />
+                <X className="h-6 w-6" />
               </Button>
               <Button
-                className="w-full h-12"
+                className="w-full h-12 bg-[#28a745]"
                 onClick={moveToAssignmentScanning}
-                variant="outline"
                 size="icon"
                 disabled={error != ""}
               >
-                <Check className="h-4 w-4" />
+                <Check className="h-6 w-6" />
               </Button>
             </div>
           </div>
@@ -339,23 +337,21 @@ export default function Checkin() {
           {/* Two buttons for Yes/No confirmation */}
           <div className="flex flex-col">
             <p className="text-xl text-center">Assign new event code anyway?</p>
-            <div className="flex flex-row gap-4 w-full justify-center mt-4 border-4">
+            <div className="flex flex-row gap-4 w-full justify-center mt-4">
               <Button
-                className="w-full h-12"
+                className="w-full h-12 bg-[#dc3545]"
                 onClick={resetCheckin}
-                variant="outline"
                 size="icon"
               >
-                <X className="h-4 w-4" />
+                <X className="h-6 w-6" />
               </Button>
               <Button
-                className="w-full h-12"
+                className="w-full h-12 bg-[#28a745]"
                 onClick={confirmOverwriteEventQRCode}
-                variant="outline"
                 size="icon"
                 disabled={error != ""}
               >
-                <Check className="h-4 w-4" />
+                <Check className="h-6 w-6" />
               </Button>
             </div>
           </div>
@@ -416,16 +412,15 @@ export default function Checkin() {
             </Card>
 
             <div className="bg-green-200 text-green-800 p-4 rounded-md text-center">
-              <h2>Success! Event QR code linked with the hacker.</h2>
+              <h2>🎉 Success! Event QR code linked with hacker. 🎉</h2>
             </div>
           </div>
           <Button
-            className="w-full h-12 mt-5"
+            className="w-full h-12 mt-5 bg-[#007bff]"
             onClick={resetCheckin}
-            variant="outline"
             size="icon"
           >
-            <Check className="h-4 w-4" />
+            <Check className="h-6 w-6" />
           </Button>
         </div>
       )}

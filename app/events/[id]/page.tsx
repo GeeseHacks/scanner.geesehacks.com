@@ -4,7 +4,8 @@ import React, { useEffect, useState } from "react";
 import QRCodeScanner from "@/components/Scanner";
 import { HackerEvent } from "@/types/hackerEvent";
 import { Button } from "@/components/ui/button";
-import { Check, ChevronLeft } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Check, House } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 // Define the different stages for the event page
@@ -113,7 +114,14 @@ export default function EventPage({ params }: { params: { id: string } }) {
   };
 
   if (loading) {
-    return <div>Loading...</div>; // Loading state
+    return (
+      <div className="w-full h-screen p-4 flex flex-col items-center">
+        <Skeleton className="h-8 w-72 my-2" />
+        <Skeleton className="h-6 w-52 my-2" />
+        <Skeleton className="h-6 w-60 mt-4" />
+        <Skeleton className="h-full w-full mt-4 rounded-xl" />
+      </div>
+    );
   }
 
   if (!event) {
@@ -121,14 +129,14 @@ export default function EventPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="h-screen w-full flex flex-col items-center p-4 border-4">
+    <div className="h-screen w-full flex flex-col items-center p-4">
       <Button
-        className="absolute top-5 left-4 bg-[#1c2d44]"
+        className="absolute top-4 left-4"
         onClick={handleBackButtonPress}
         variant="outline"
         size="icon"
       >
-        <ChevronLeft className="h-6 w-6 mr-1" />
+        <House className="h-5 w-5" />
       </Button>
 
       <h1 className="text-3xl pt-4">Event Scanning</h1>
@@ -154,14 +162,13 @@ export default function EventPage({ params }: { params: { id: string } }) {
             )}
           </div>
 
-          <div className="flex flex-row gap-4 w-full justify-center mt-4 border-4">
+          <div className="flex flex-row gap-4 w-full justify-center mt-4">
             <Button
-              className="w-full h-12"
+              className="w-full h-12 bg-[#007bff]"
               onClick={handleYesConfirmation}
-              variant="outline"
               size="icon"
             >
-              <Check className="h-4 w-4" />
+              <Check className="h-6 w-6" />
             </Button>
           </div>
         </div>

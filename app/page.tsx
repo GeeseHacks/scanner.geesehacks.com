@@ -21,7 +21,7 @@ export default function Home() {
       <div className="flex flex-col gap-2">
 
       <h1 className="mt-4">Check-in</h1>
-      <Button onClick={handleCheckinRedirect}>Check-in</Button>
+      <Button onClick={handleCheckinRedirect} className="rounded-xl">Check-in</Button>
       <h1 className="mt-4">Events</h1>
       <EventCards />
       </div>
