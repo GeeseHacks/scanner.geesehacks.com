@@ -29,6 +29,7 @@ export default function Checkin() {
   const [hackerInfo, setHackerInfo] = useState<HackerInfo | null>(null);
   const [eventCode, setEventCode] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [fatalError, setFatalError] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]); // Changed to an array of strings
   const [stage, setStage] = useState<Stage>("checkin_scanning"); // State to track the stage
   const router = useRouter();
@@ -77,10 +78,12 @@ export default function Checkin() {
       } else if (response.status === 400) {
         setError("Scanned QR Code is not an email");
         setHackerInfo(null);
+      } else {
+        setFatalError("Error fetching hacker information.");
       }
       setStage("verify");
     } catch (error) {
-      setError("Error fetching hacker information.");
+      setFatalError("Error fetching hacker information.");
       console.error(error);
       setStage("checkin_scanning");
     }
@@ -127,10 +130,10 @@ export default function Checkin() {
         setStage("success"); // Move to success stage upon successful API response
       } else {
         console.log(response);
-        setError("Error associating event with the hacker.");
+        setFatalError("Error associating event with the hacker.");
       }
     } catch (error) {
-      setError("Error saving event data.");
+      setFatalError("Error associating event with the hacker.");
       console.error(error);
     }
   };
@@ -161,6 +164,23 @@ export default function Checkin() {
     setError(""); // Clear any errors
     setStage("checkin_scanning"); // Set stage back to checkin_scanning
   };
+
+  if (fatalError) {
+    return (
+      <div className="p-4 flex flex-col w-full justify-betwee gap-6">
+        <Card className="bg-red-500 p-4">Error: {fatalError}</Card>
+
+        <Button
+          className="w-full"
+          onClick={handleBackButtonPress}
+          variant="outline"
+          size="icon"
+        >
+          Go Back Home
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen w-full flex flex-col items-center p-4">

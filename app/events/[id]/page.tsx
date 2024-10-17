@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Check, House } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Card } from "@/components/ui/card";
 
 // Define the different stages for the event page
 type Stage = "scanning" | "results";
@@ -15,6 +16,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
   const [event, setEvent] = useState<HackerEvent | null>(null); // Initialize as null for better handling
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [fatalError, setFatalError] = useState<string | null>(null);
   const [stage, setStage] = useState<Stage>("scanning"); // String state to track the current stage
   const [eventCode, setEventCode] = useState<string>(""); // Hacker's QR Code Badge
   const router = useRouter();
@@ -38,9 +40,9 @@ export default function EventPage({ params }: { params: { id: string } }) {
         setEvent(foundEvent || null); // Set the found event or null if not found
       } catch (err) {
         if (err instanceof Error) {
-          setError(err.message);
+          setFatalError(err.message);
         } else {
-          setError("An unknown error occurred");
+          setFatalError("An unknown error occurred");
         }
       } finally {
         setLoading(false);
@@ -85,7 +87,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
         if (response.status === 409) {
           setError("Event ID already recorded."); // Handle conflict case
         } else {
-          setError(
+          setFatalError(
             errorData.error ||
               "An error occurred while assigning the event code"
           );
@@ -102,7 +104,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
       setStage("results"); // Switch to results stage
     } catch (error) {
       console.error("Failed to assign event QR code:", error);
-      setError("An error occurred while assigning the event code");
+      setFatalError("An error occurred while assigning the event code");
       setStage("results");
     }
   };
@@ -128,6 +130,23 @@ export default function EventPage({ params }: { params: { id: string } }) {
     return <div>No event found.</div>; // Handle case where event is null
   }
 
+  if (fatalError) {
+    return (
+      <div className="p-4 flex flex-col w-full justify-betwee gap-6">
+        <Card className="bg-red-500 p-4">Error: {fatalError}</Card>
+
+        <Button
+          className="w-full"
+          onClick={handleBackButtonPress}
+          variant="outline"
+          size="icon"
+        >
+          Go Back Home
+        </Button>
+      </div>
+    );
+  }
+  
   return (
     <div className="h-screen w-full flex flex-col items-center p-4">
       <Button
