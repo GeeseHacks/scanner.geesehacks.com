@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 import QRCodeScanner from "@/components/Scanner";
 import { HackerEvent } from "@/types/hackerEvent";
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
-import { set } from "zod";
+import { Check, ChevronLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // Define the different stages for the event page
 type Stage = "scanning" | "results";
@@ -16,6 +16,11 @@ export default function EventPage({ params }: { params: { id: string } }) {
   const [error, setError] = useState<string | null>(null);
   const [stage, setStage] = useState<Stage>("scanning"); // String state to track the current stage
   const [eventCode, setEventCode] = useState<string>(""); // Hacker's QR Code Badge
+  const router = useRouter();
+
+  const handleBackButtonPress = () => {
+    router.push("/");
+  };
 
   // Fetch all events from the API
   useEffect(() => {
@@ -51,15 +56,15 @@ export default function EventPage({ params }: { params: { id: string } }) {
   const handleEventQRScan = async (scannedEventCode: string): Promise<void> => {
     // Process the scanning result
     console.log("Scan result:", scannedEventCode);
-  
+
     if (!validateQRCode(scannedEventCode)) {
       setError("Invalid QR Code");
       setStage("results");
       return; // Exit the function if the QR code is invalid
     }
-  
+
     setEventCode(scannedEventCode);
-    
+
     // Make the API call to assign the event QR code
     try {
       const response = await fetch("/api/scan-hacker", {
@@ -72,31 +77,35 @@ export default function EventPage({ params }: { params: { id: string } }) {
           eventId: String(event?.id), // The ID of the event
         }),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         // Handle specific error responses
         if (response.status === 409) {
           setError("Event ID already recorded."); // Handle conflict case
         } else {
-          setError(errorData.error || "An error occurred while assigning the event code");
+          setError(
+            errorData.error ||
+              "An error occurred while assigning the event code"
+          );
         }
+        setStage("results"); // Switch to results stage
         return;
       }
-  
+
       // Success handling
       const result = await response.json();
       console.log("Event assigned successfully:", result);
-      
+
       // Proceed to the results stage
       setStage("results"); // Switch to results stage
     } catch (error) {
       console.error("Failed to assign event QR code:", error);
       setError("An error occurred while assigning the event code");
+      setStage("results");
     }
   };
-  
-  
+
   // Handle user confirmation
   const handleYesConfirmation = (): void => {
     setError("");
@@ -112,8 +121,18 @@ export default function EventPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <>
-      <b className="p-4">Currently selected event: {event.name}</b>
+    <div className="h-screen w-full flex flex-col items-center p-4">
+      <Button
+        className="absolute top-5 left-4 bg-[#1c2d44]"
+        onClick={handleBackButtonPress}
+        variant="outline"
+        size="icon"
+      >
+        <ChevronLeft className="h-6 w-6 mr-1" />
+      </Button>
+      
+      <h1 className="text-3xl pt-4">Event Scanning</h1>
+      <b className="my-2">{event.name}</b>
       {stage === "scanning" && (
         <QRCodeScanner
           setScannedData={handleEventQRScan}
@@ -153,6 +172,6 @@ export default function EventPage({ params }: { params: { id: string } }) {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

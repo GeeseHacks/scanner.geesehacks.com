@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, X } from "lucide-react";
+import { Check, X, ChevronLeft } from "lucide-react";
 import QRCodeScanner from "@/components/Scanner";
+import { useRouter } from "next/navigation";
 
 interface HackerInfo {
   id: string;
@@ -30,6 +31,11 @@ export default function Checkin() {
   const [error, setError] = useState<string>("");
   const [warnings, setWarnings] = useState<string[]>([]); // Changed to an array of strings
   const [stage, setStage] = useState<Stage>("checkin_scanning"); // State to track the stage
+  const router = useRouter();
+
+  const handleBackButtonPress = () => {
+    router.push("/");
+  };
 
   // Fetch hacker info when email is updated
   useEffect(() => {
@@ -158,6 +164,15 @@ export default function Checkin() {
 
   return (
     <div className="h-screen w-full flex flex-col items-center p-4">
+      <Button
+        className="absolute top-5 left-4 bg-[#1c2d44]"
+        onClick={handleBackButtonPress}
+        variant="outline"
+        size="icon"
+      >
+        <ChevronLeft className="h-6 w-6 mr-1" />
+      </Button>
+
       <h1 className="text-3xl pt-4">Hacker Check-in</h1>
 
       {/* QR Code Scanner is shown only in the checkin_scanning or assignment_scanning stage */}
@@ -277,11 +292,10 @@ export default function Checkin() {
               <div className="mt-6">
                 <p className="text-lg text-gray-400">Scanned Event Code</p>
                 <h2 className="text-3xl">
-                {eventCode.startsWith(
+                  {eventCode.startsWith(
                     "https://portal.geesehacks.com/user/"
                   ) ? (
                     <div className="flex flex-col">
-                      <p className="text-lg">{`https://portal.geesehacks.com/user/`}</p>
                       <h2>
                         {eventCode.slice(
                           "https://portal.geesehacks.com/user/".length
@@ -383,7 +397,6 @@ export default function Checkin() {
                       "https://portal.geesehacks.com/user/"
                     ) ? (
                       <div className="flex flex-col">
-                        <p className="text-lg">{`https://portal.geesehacks.com/user/`}</p>
                         <h2>
                           {eventCode.slice(
                             "https://portal.geesehacks.com/user/".length
