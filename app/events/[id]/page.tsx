@@ -121,7 +121,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="h-screen w-full flex flex-col items-center p-4">
+    <div className="h-screen w-full flex flex-col items-center p-4 border-4">
       <Button
         className="absolute top-5 left-4 bg-[#1c2d44]"
         onClick={handleBackButtonPress}
@@ -130,7 +130,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
       >
         <ChevronLeft className="h-6 w-6 mr-1" />
       </Button>
-      
+
       <h1 className="text-3xl pt-4">Event Scanning</h1>
       <b className="my-2">{event.name}</b>
       {stage === "scanning" && (
@@ -140,35 +140,29 @@ export default function EventPage({ params }: { params: { id: string } }) {
         />
       )}
       {stage === "results" && (
-        <div>
-          {error != "" && (
-            <div className="flex flex-col gap-4 my-4">
+        <div className="h-full w-full flex flex-col justify-between">
+          <div className="flex flex-col gap-4 my-4">
+            {error != "" && (
               <div className="bg-red-200 text-red-800 p-4 rounded-md text-center">
                 ❌ {error} ❌
               </div>
-            </div>
-          )}
-
-          {error == "" && (
-            <div className="flex flex-col gap-4 my-4">
+            )}
+            {error == "" && (
               <div className="bg-green-200 text-green-800 p-4 rounded-md text-center">
                 🎉 Success! 🎉
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
-          <div className="flex flex-col">
-            {/* <p className="text-xl text-center">Assign new event code anyway?</p> */}
-            <div className="flex flex-row gap-4 w-full justify-center mt-4 border-4">
-              <Button
-                className="w-full h-12"
-                onClick={handleYesConfirmation}
-                variant="outline"
-                size="icon"
-              >
-                <Check className="h-4 w-4" />
-              </Button>
-            </div>
+          <div className="flex flex-row gap-4 w-full justify-center mt-4 border-4">
+            <Button
+              className="w-full h-12"
+              onClick={handleYesConfirmation}
+              variant="outline"
+              size="icon"
+            >
+              <Check className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       )}

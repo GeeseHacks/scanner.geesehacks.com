@@ -184,74 +184,75 @@ export default function Checkin() {
       )}
 
       {stage === "verify" && (
-        <div className="w-full">
-          <Card className="my-5">
-            <CardHeader>
-              <h1 className="text-xl text-center">Hacker Info</h1>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col gap-4">
-                <div>
-                  <p className="text-lg text-gray-400">Name</p>
-                  <h2 className="text-3xl">
-                    {hackerInfo
-                      ? `${hackerInfo.firstname} ${hackerInfo.lastname}`
-                      : "Null"}
-                  </h2>
-                </div>
-                <div>
-                  <p className="text-lg text-gray-400">Email</p>
-                  <h2 className="text-3xl">
-                    {hackerInfo ? hackerInfo.email : "Null"}
-                  </h2>
-                </div>
+        <div className="w-full h-full flex flex-col justify-between">
+          <div>
+            <Card className="my-5">
+              <CardHeader>
+                <h1 className="text-xl text-center">Hacker Info</h1>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <p className="text-lg text-gray-400">Name</p>
+                    <h2 className="text-3xl">
+                      {hackerInfo
+                        ? `${hackerInfo.firstname} ${hackerInfo.lastname}`
+                        : "Null"}
+                    </h2>
+                  </div>
+                  <div>
+                    <p className="text-lg text-gray-400">Email</p>
+                    <h2 className="text-3xl">
+                      {hackerInfo ? hackerInfo.email : "Null"}
+                    </h2>
+                  </div>
 
-                <div>
-                  <p className="text-lg text-gray-400">Application Status</p>
-                  <h2
-                    className={`text-3xl ${
-                      hackerInfo
+                  <div>
+                    <p className="text-lg text-gray-400">Application Status</p>
+                    <h2
+                      className={`text-3xl ${
+                        hackerInfo
+                          ? hackerInfo.accepted
+                            ? "text-green-500"
+                            : "text-red-500"
+                          : "Null"
+                      }`}
+                    >
+                      {hackerInfo
                         ? hackerInfo.accepted
-                          ? "text-green-500"
-                          : "text-red-500"
-                        : "Null"
-                    }`}
+                          ? "Accepted"
+                          : "Rejected"
+                        : "Null"}
+                    </h2>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Warnings box for verification stage */}
+            {warnings.length > 0 && (
+              <div className="flex flex-col gap-4 my-4">
+                {" "}
+                {/* Container for spacing */}
+                {warnings.map((warning, index) => (
+                  <div
+                    key={index}
+                    className="bg-yellow-200 text-yellow-800 p-4 rounded-md text-center"
                   >
-                    {hackerInfo
-                      ? hackerInfo.accepted
-                        ? "Accepted"
-                        : "Rejected"
-                      : "Null"}
-                  </h2>
+                    ⚠️ {warning} ⚠️ {/* Render each warning in its own box */}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {error != "" && (
+              <div className="flex flex-col gap-4 my-4">
+                <div className="bg-red-200 text-red-800 p-4 rounded-md text-center">
+                  ❌ {error} ❌
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Warnings box for verification stage */}
-          {warnings.length > 0 && (
-            <div className="flex flex-col gap-4 my-4">
-              {" "}
-              {/* Container for spacing */}
-              {warnings.map((warning, index) => (
-                <div
-                  key={index}
-                  className="bg-yellow-200 text-yellow-800 p-4 rounded-md text-center"
-                >
-                  ⚠️ {warning} ⚠️ {/* Render each warning in its own box */}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {error != "" && (
-            <div className="flex flex-col gap-4 my-4">
-              <div className="bg-red-200 text-red-800 p-4 rounded-md text-center">
-                ❌ {error} ❌
-              </div>
-            </div>
-          )}
-
+            )}
+          </div>
           {/* Two buttons for Yes/No confirmation */}
           <div className="flex flex-col">
             <p className="text-xl text-center">Confirm Hacker's Identity?</p>
@@ -286,54 +287,55 @@ export default function Checkin() {
       )}
 
       {stage === "assignment" && (
-        <div>
-          <Card className="my-5">
-            <CardContent>
-              <div className="mt-6">
-                <p className="text-lg text-gray-400">Scanned Event Code</p>
-                <h2 className="text-3xl">
-                  {eventCode.startsWith(
-                    "https://portal.geesehacks.com/user/"
-                  ) ? (
-                    <div className="flex flex-col">
-                      <h2>
-                        {eventCode.slice(
-                          "https://portal.geesehacks.com/user/".length
-                        )}
-                      </h2>
-                    </div>
-                  ) : (
-                    "Invalid Event Code"
-                  )}
-                </h2>
-              </div>
-            </CardContent>
-          </Card>
-
-          {error != "" && (
-            <div className="flex flex-col gap-4 my-4">
-              <div className="bg-red-200 text-red-800 p-4 rounded-md text-center">
-                ❌ {error} ❌
-              </div>
-            </div>
-          )}
-
-          {/* Warnings box for verification stage */}
-          {warnings.length > 0 && (
-            <div className="flex flex-col gap-4 my-4">
-              {" "}
-              {/* Container for spacing */}
-              {warnings.map((warning, index) => (
-                <div
-                  key={index}
-                  className="bg-yellow-200 text-yellow-800 p-4 rounded-md text-center"
-                >
-                  ⚠️ {warning} ⚠️ {/* Render each warning in its own box */}
+        <div className="w-full h-full flex flex-col justify-between">
+          <div>
+            <Card className="my-5">
+              <CardContent>
+                <div className="mt-6">
+                  <p className="text-lg text-gray-400">Scanned Event Code</p>
+                  <h2 className="text-3xl">
+                    {eventCode.startsWith(
+                      "https://portal.geesehacks.com/user/"
+                    ) ? (
+                      <div className="flex flex-col">
+                        <h2>
+                          {eventCode.slice(
+                            "https://portal.geesehacks.com/user/".length
+                          )}
+                        </h2>
+                      </div>
+                    ) : (
+                      "Invalid Event Code"
+                    )}
+                  </h2>
                 </div>
-              ))}
-            </div>
-          )}
+              </CardContent>
+            </Card>
 
+            {error != "" && (
+              <div className="flex flex-col gap-4 my-4">
+                <div className="bg-red-200 text-red-800 p-4 rounded-md text-center">
+                  ❌ {error} ❌
+                </div>
+              </div>
+            )}
+
+            {/* Warnings box for verification stage */}
+            {warnings.length > 0 && (
+              <div className="flex flex-col gap-4 my-4">
+                {" "}
+                {/* Container for spacing */}
+                {warnings.map((warning, index) => (
+                  <div
+                    key={index}
+                    className="bg-yellow-200 text-yellow-800 p-4 rounded-md text-center"
+                  >
+                    ⚠️ {warning} ⚠️ {/* Render each warning in its own box */}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           {/* Two buttons for Yes/No confirmation */}
           <div className="flex flex-col">
             <p className="text-xl text-center">Assign new event code anyway?</p>
@@ -361,61 +363,62 @@ export default function Checkin() {
       )}
 
       {stage === "success" && hackerInfo && eventCode && (
-        <div>
-          <Card className="my-5">
-            <CardHeader>
-              <h1 className="text-xl text-center">Hacker Info</h1>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col gap-4">
-                <div>
-                  <p className="text-lg text-gray-400">Name</p>
-                  <h2 className="text-3xl">
-                    {hackerInfo.firstname} {hackerInfo.lastname}
-                  </h2>
-                </div>
-                <div>
-                  <p className="text-lg text-gray-400">Email</p>
-                  <h2 className="text-3xl">{hackerInfo.email}</h2>
-                </div>
+        <div className="w-full h-full flex flex-col justify-between">
+          <div>
+            <Card className="my-5">
+              <CardHeader>
+                <h1 className="text-xl text-center">Hacker Info</h1>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <p className="text-lg text-gray-400">Name</p>
+                    <h2 className="text-3xl">
+                      {hackerInfo.firstname} {hackerInfo.lastname}
+                    </h2>
+                  </div>
+                  <div>
+                    <p className="text-lg text-gray-400">Email</p>
+                    <h2 className="text-3xl">{hackerInfo.email}</h2>
+                  </div>
 
-                <div>
-                  <p className="text-lg text-gray-400">Application Status</p>
-                  <h2
-                    className={`text-3xl ${
-                      hackerInfo.accepted ? "text-green-500" : "text-red-500"
-                    }`}
-                  >
-                    {hackerInfo.accepted ? "Accepted" : "Rejected"}
-                  </h2>
-                </div>
+                  <div>
+                    <p className="text-lg text-gray-400">Application Status</p>
+                    <h2
+                      className={`text-3xl ${
+                        hackerInfo.accepted ? "text-green-500" : "text-red-500"
+                      }`}
+                    >
+                      {hackerInfo.accepted ? "Accepted" : "Rejected"}
+                    </h2>
+                  </div>
 
-                <div>
-                  <p className="text-lg text-gray-400">Scanned Event Code</p>
-                  <h2 className="text-3xl">
-                    {eventCode.startsWith(
-                      "https://portal.geesehacks.com/user/"
-                    ) ? (
-                      <div className="flex flex-col">
-                        <h2>
-                          {eventCode.slice(
-                            "https://portal.geesehacks.com/user/".length
-                          )}
-                        </h2>
-                      </div>
-                    ) : (
-                      "Invalid Event Code"
-                    )}
-                  </h2>
+                  <div>
+                    <p className="text-lg text-gray-400">Scanned Event Code</p>
+                    <h2 className="text-3xl">
+                      {eventCode.startsWith(
+                        "https://portal.geesehacks.com/user/"
+                      ) ? (
+                        <div className="flex flex-col">
+                          <h2>
+                            {eventCode.slice(
+                              "https://portal.geesehacks.com/user/".length
+                            )}
+                          </h2>
+                        </div>
+                      ) : (
+                        "Invalid Event Code"
+                      )}
+                    </h2>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <div className="bg-green-200 text-green-800 p-4 rounded-md text-center">
-            <h2>Success! Event QR code linked with the hacker.</h2>
+            <div className="bg-green-200 text-green-800 p-4 rounded-md text-center">
+              <h2>Success! Event QR code linked with the hacker.</h2>
+            </div>
           </div>
-
           <Button
             className="w-full h-12 mt-5"
             onClick={resetCheckin}

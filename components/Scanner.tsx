@@ -53,11 +53,11 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ setScannedData, title }) 
   }, [setScannedData]);
 
   return (
-    <div className="w-full h-[full] flex flex-col justify-between">
+    <div className="w-full h-full flex flex-col justify-between">
       <p className="text-center w-full py-3">{title}</p>
 
       {/* <h2 className="text-xl font-semibold mb-2">Scan QR Code</h2> */}
-      <div className="h-[80vh] flex justify-center overflow-x-hidden">
+      <div className="h-full flex justify-center overflow-x-hidden">
         <video ref={videoRef} className="hidden" />
         <canvas ref={canvasRef} className="h-full" />
       </div>
