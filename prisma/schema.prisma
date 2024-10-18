@@ -58,6 +58,12 @@ model UserAuth {
   tokenExpiration DateTime?
 }
 
+model ScannerUserAuth {
+  id              String    @id @db.VarChar(36)
+  email           String    @unique @db.VarChar(100)
+  password        String    @db.VarChar(60)
+}
+
 model EventParticipation {
   id        Int     @id @default(autoincrement())
   eventName String  @db.VarChar(255)
