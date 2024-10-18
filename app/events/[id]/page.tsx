@@ -15,7 +15,7 @@ type Stage = "scanning" | "results";
 export default function EventPage({ params }: { params: { id: string } }) {
   const [event, setEvent] = useState<HackerEvent | null>(null); // Initialize as null for better handling
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string>("");
   const [fatalError, setFatalError] = useState<string | null>(null);
   const [stage, setStage] = useState<Stage>("scanning"); // String state to track the current stage
   const [eventCode, setEventCode] = useState<string>(""); // Hacker's QR Code Badge
@@ -80,7 +80,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
           eventId: String(event?.id), // The ID of the event
         }),
       });
-
+      
       if (!response.ok) {
         const errorData = await response.json();
         // Handle specific error responses
@@ -146,7 +146,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
       </div>
     );
   }
-  
+
   return (
     <div className="h-screen w-full flex flex-col items-center p-4">
       <Button

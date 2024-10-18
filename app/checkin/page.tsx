@@ -307,7 +307,7 @@ export default function Checkin() {
       {stage === "assignment" && (
         <div className="w-full h-full flex flex-col justify-between">
           <div>
-            <Card className="my-5">
+            <Card className="my-5 bg-[#1c2d44]">
               <CardContent>
                 <div className="mt-6">
                   <p className="text-lg text-gray-400">Scanned Event Code</p>
@@ -381,7 +381,7 @@ export default function Checkin() {
       {stage === "success" && hackerInfo && eventCode && (
         <div className="w-full h-full flex flex-col justify-between">
           <div>
-            <Card className="my-5">
+            <Card className="my-5 bg-[#1c2d44]">
               <CardHeader>
                 <h1 className="text-xl text-center">Hacker Info</h1>
               </CardHeader>
