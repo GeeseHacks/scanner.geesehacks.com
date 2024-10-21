@@ -37,7 +37,7 @@ const EventCards: React.FC = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 px-5">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {loading
         ? [...Array(3)].map((_, i) => (
             <EventCard key={i} loading={true} />

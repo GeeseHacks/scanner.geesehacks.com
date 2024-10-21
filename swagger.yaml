@@ -1,0 +1,292 @@
+openapi: 3.0.0
+info:
+  title: Registration Portal API
+  version: 1.1.0
+  description: API Documentation for the Registration Portal
+servers:
+  - url: http://localhost:3000
+    description: Local server for development
+tags:
+  - name: users
+    description: User related endpoints
+  - name: qr-codes
+    description: QR Code registration related endpoints
+  - name: events
+    description: Event related endpoints
+  - name: scan-hacker
+    description: Scanning hacker events related endpoints
+paths:
+  /api/assign-event-qrcode:
+    post:
+      tags:
+        - qr-codes
+      summary: Assign an event QR code to a user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: user@example.com
+                  description: User's email address
+                qrCode:
+                  type: string
+                  example: https://portal.geesehacks.com/user/12345
+                  description: QR code associated with the user
+      responses:
+        '200':
+          description: QR code assigned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    example: user@example.com
+                  event_qr_code:
+                    type: string
+                    example: https://portal.geesehacks.com/user/12345
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: QR code must start with https://portal.geesehacks.com/user/
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User not found
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: An error occurred while assigning the QR code
+
+  /api/users/{email}:
+    get:
+      tags:
+        - users
+      summary: Get user details by email
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+            example: user@example.com
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: The unique identifier for a user.
+                  firstname:
+                    type: string
+                    description: The user's first name.
+                  lastname:
+                    type: string
+                    description: The user's last name.
+                  email:
+                    type: string
+                    description: The user's email address.
+        '400':
+          description: Invalid email format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid email format
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User not found
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Error fetching user
+
+  /api/events:
+    get:
+      tags:
+        - events
+      summary: Get a list of hacker events from Google Sheets
+      responses:
+        '200':
+          description: A list of events retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      description: The unique identifier for an event.
+                    startTime:
+                      type: string
+                      format: date-time
+                      description: The starting time of the event.
+                    endTime:
+                      type: string
+                      format: date-time
+                      description: The ending time of the event.
+                    name:
+                      type: string
+                      description: The name of the event.
+                    eventType:
+                      type: string
+                      description: The type of the event.
+                    location:
+                      type: string
+                      description: The location of the event.
+                    details:
+                      type: string
+                      description: Additional details about the event.
+                    needsScanning:
+                      type: boolean
+                      description: Indicates if the event requires scanning.
+        '404':
+          description: No data found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: No data found
+        '500':
+          description: Server error while fetching data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Error fetching data
+
+  /api/scan-hacker:
+    post:
+      tags:
+        - scan-hacker
+      summary: Assign an event ID to a user based on QR code
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                qrCode:
+                  type: string
+                  example: https://portal.geesehacks.com/user/12345
+                  description: QR code associated with the user
+                eventId:
+                  type: string
+                  example: 'event-12345'
+                  description: The ID of the event to be assigned
+      responses:
+        '200':
+          description: Event ID assigned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: The unique identifier for the user.
+                  attendedEventIds:
+                    type: array
+                    items:
+                      type: string
+                    description: The list of event IDs attended by the user.
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: QR code must start with https://portal.geesehacks.com/user/
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User not found
+        '409':
+          description: Event ID already recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Event ID already recorded.
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: An error occurred while assigning the event ID
