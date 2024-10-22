@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     // Create the new user
     const newUser = await prisma.scannerUserAuth.create({
       data: {
-        id: "100",
+        id: "0",
         email,
         password: hashedPassword
       },
