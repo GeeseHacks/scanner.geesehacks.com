@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     const { email, password } = validationResult.data;
 
     // Check if the user already exists
-    const existingUser = await prisma.userAuth.findUnique({
+    const existingUser = await prisma.scannerUserAuth.findUnique({
       where: { email },
     });
 
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Create the new user
-    const newUser = await prisma.userAuth.create({
+    const newUser = await prisma.scannerUserAuth.create({
       data: {
         id: "100",
         email,
