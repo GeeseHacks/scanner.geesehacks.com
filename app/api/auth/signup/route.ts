@@ -55,9 +55,7 @@ export async function POST(req: NextRequest) {
       data: {
         id: "100",
         email,
-        password: hashedPassword,
-        resetToken: null,
-        tokenExpiration: null
+        password: hashedPassword
       },
     });
 
