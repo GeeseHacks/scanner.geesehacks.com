@@ -200,6 +200,7 @@ export default function Checkin() {
         <QRCodeScanner
           setScannedData={setEmail}
           title={"Scan Check-in QR Code"}
+          isCheckIn={true}
         />
       )}
 

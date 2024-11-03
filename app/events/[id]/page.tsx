@@ -159,11 +159,10 @@ export default function EventPage({ params }: { params: { id: string } }) {
       </Button>
 
       <h1 className="text-3xl pt-4">Event Scanning</h1>
-      <b className="my-2">{event.name}</b>
       {stage === "scanning" && (
         <QRCodeScanner
           setScannedData={handleEventQRScan}
-          title={"Scan Hacker QR Code"}
+          title={event.name}
         />
       )}
       {stage === "results" && (
