@@ -20,7 +20,12 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ setScannedData, title, is
 
   const initializeCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "environment",
+          frameRate: { ideal: 30, max: 60 }, // Set ideal and maximum frame rates
+        },
+      });
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -119,11 +124,20 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ setScannedData, title, is
       </p>
 
       {!manualEntry && 
-      <div className="h-full flex justify-center overflow-x-hidden rounded-xl">
-        <video ref={videoRef} className={manualEntry ? "hidden" : "h-full"} />
-        <canvas ref={canvasRef} className={manualEntry ? "hidden" : "h-full"} />
-      </div>
+        <div className="h-full flex justify-center items-center overflow-hidden rounded-xl">
+          <div className="relative w-full h-full">
+            <video
+              ref={videoRef}
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full object-cover"
+            />
+            <canvas
+              ref={canvasRef}
+              className="absolute top-0 left-0 w-full h-full object-cover"
+            />
+          </div>
+        </div>
       }
+
 
       {!manualEntry && <Button
         className="mt-4 p-2 bg-blue-500 text-white rounded"
