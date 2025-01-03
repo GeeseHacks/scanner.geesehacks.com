@@ -20,7 +20,7 @@ export async function GET() {
     // Query data from Google Sheets
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.SHEET_ID,
-      range: 'Events!A2:H',
+      range: 'Events!A2:I',
     });
 
     const rows = response.data.values;
@@ -39,6 +39,7 @@ export async function GET() {
       location: row[5],
       details: row[6] || '',
       needsScanning: row[7] === 'TRUE',
+      netWorth: row[8],
     }));
 
     // Return the events data as JSON

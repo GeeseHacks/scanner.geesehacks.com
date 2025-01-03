@@ -12,7 +12,7 @@ interface HackerInfo {
   firstname: string;
   lastname: string;
   email: string;
-  accepted: boolean;
+  status: string;
 }
 
 // Define the different stages
@@ -57,14 +57,13 @@ export default function Checkin() {
       });
 
       const data = await response.json();
-
       if (response.status === 200) {
         setHackerInfo(data);
         setError("");
 
         const newWarnings: string[] = []; // Create a new warnings array
 
-        if (!data.accepted) {
+        if (data.status != "CONFIRMED") {
           newWarnings.push("Warning: Hacker is not accepted.");
         }
         if (data.event_qr_code != null) {
@@ -233,17 +232,13 @@ export default function Checkin() {
                     <h2
                       className={`text-3xl ${
                         hackerInfo
-                          ? hackerInfo.accepted
+                          ? hackerInfo.status == "CONFIRMED"
                             ? "text-green-500"
                             : "text-red-500"
                           : "Null"
                       }`}
                     >
-                      {hackerInfo
-                        ? hackerInfo.accepted
-                          ? "Accepted"
-                          : "Rejected"
-                        : "Null"}
+                    {hackerInfo?.status === "CONFIRMED" ? "Accepted" : "Rejected"}
                     </h2>
                   </div>
                 </div>
@@ -403,10 +398,10 @@ export default function Checkin() {
                     <p className="text-lg text-gray-400">Application Status</p>
                     <h2
                       className={`text-3xl ${
-                        hackerInfo.accepted ? "text-green-500" : "text-red-500"
+                        hackerInfo.status == "CONFIRMED" ? "text-green-500" : "text-red-500"
                       }`}
                     >
-                      {hackerInfo.accepted ? "Accepted" : "Rejected"}
+                      {hackerInfo.status == "CONFIRMED" ? "Accepted" : "Rejected"}
                     </h2>
                   </div>
 
