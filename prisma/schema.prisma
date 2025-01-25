@@ -33,11 +33,13 @@ model User {
   resume                     String?               @db.VarChar(255)
   t_shirt_size               String?               @db.VarChar(50)
   status                     UserStatus
-  attendedEventIds           Json?
   event_qr_code              String?               @unique @db.VarChar(255)
-  team_id                    String?               @db.Uuid
+  attendedEventIds           Json?
   net_worth                  Int                   @default(0)
+  project_id                 String?               @db.Uuid
   application_responses      ApplicationResponse[]
+
+  @@index([project_id])
 }
 
 model ApplicationResponse {
@@ -64,73 +66,82 @@ model ScannerUserAuth {
   password String @db.VarChar(60)
 }
 
-model EventParticipation {
-  id        Int     @id @default(autoincrement())
-  eventName String  @db.VarChar(255)
-  projectId Int
-  amount    Int     @default(0)
-  Project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  @@index([projectId])
-}
-
-model Investment {
-  id        Int      @id @default(autoincrement())
-  amount    Int
-  judgeId   Int
-  projectId Int
-  createdAt DateTime @default(now())
-  Judge     Judge    @relation(fields: [judgeId], references: [id], onDelete: Cascade)
-  Project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  @@index([judgeId])
-  @@index([projectId])
-}
-
 model Judge {
-  id                                          Int          @id @default(autoincrement())
-  name                                        String       @db.VarChar(255)
-  company                                     String?      @db.VarChar(255)
-  isGuest                                     Boolean      @default(false)
-  availableFunds                              Int          @default(10000)
-  Investment                                  Investment[]
-  JudgePair_JudgePair_primaryJudgeIdToJudge   JudgePair[]  @relation("JudgePair_primaryJudgeIdToJudge")
-  JudgePair_JudgePair_secondaryJudgeIdToJudge JudgePair[]  @relation("JudgePair_secondaryJudgeIdToJudge")
+  id                Int                 @id @default(autoincrement())
+  name              String              @db.VarChar(255)
+  availableFunds    Int                 @default(10000)
+  login_key         String              @unique @db.VarChar(255)
+  InvestmentHistory InvestmentHistory[]
+  JudgeCategory     JudgeCategory[]
+  JudgeProject      JudgeProject[]
 
   @@index([name])
-}
-
-model JudgePair {
-  id                                      Int       @id @default(autoincrement())
-  primaryJudgeId                          Int
-  secondaryJudgeId                        Int
-  Judge_JudgePair_primaryJudgeIdToJudge   Judge     @relation("JudgePair_primaryJudgeIdToJudge", fields: [primaryJudgeId], references: [id], onDelete: Cascade)
-  Judge_JudgePair_secondaryJudgeIdToJudge Judge     @relation("JudgePair_secondaryJudgeIdToJudge", fields: [secondaryJudgeId], references: [id], onDelete: Cascade)
-  Project                                 Project[] @relation("JudgePairTeams")
-
-  @@unique([primaryJudgeId, secondaryJudgeId])
 }
 
 model Project {
-  id                 Int                  @id @default(autoincrement())
-  name               String               @db.VarChar(255)
-  totalInvestment    Int                  @default(0)
-  EventParticipation EventParticipation[]
-  Investment         Investment[]
-  Tag                Tag[]
-  JudgePair          JudgePair[]          @relation("JudgePairTeams")
+  name              String              @db.VarChar(255)
+  description       String              @db.VarChar(255)
+  devpostLink       String              @db.VarChar(255)
+  imageUrl          String?             @db.VarChar(255)
+  id                String              @id @db.Uuid
+  InvestmentHistory InvestmentHistory[]
+  JudgeProject      JudgeProject[]
+  ProjectCategory   ProjectCategory[]
 
   @@index([name])
 }
 
-model Tag {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(50)
-  color     String  @db.VarChar(7)
-  projectId Int
+model Category {
+  id              Int               @id @default(autoincrement())
+  name            String
+  JudgeCategory   JudgeCategory[]
+  ProjectCategory ProjectCategory[]
+}
+
+model InvestmentHistory {
+  id           Int      @id @default(autoincrement())
+  projectValue Int
+  judgeId      Int
+  projectId    String   @db.Uuid
+  createdAt    DateTime @default(now())
+  Judge        Judge    @relation(fields: [judgeId], references: [id], onDelete: Cascade)
+  Project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([judgeId])
+  @@index([judgeId, projectId])
+  @@index([projectId])
+}
+
+model JudgeCategory {
+  judgeId    Int
+  categoryId Int
+  Category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  Judge      Judge    @relation(fields: [judgeId], references: [id], onDelete: Cascade)
+
+  @@id([judgeId, categoryId])
+  @@index([categoryId])
+  @@index([judgeId])
+}
+
+model JudgeProject {
+  judgeId   Int
+  projectId String  @db.Uuid
+  Judge     Judge   @relation(fields: [judgeId], references: [id], onDelete: Cascade)
   Project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  @@index([projectId])
+  @@id([judgeId, projectId])
+  @@index([judgeId])
+}
+
+model ProjectCategory {
+  projectId        String   @db.Uuid
+  categoryId       Int
+  investmentAmount Int
+  Category         Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  Project          Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, categoryId])
+  @@index([categoryId])
 }
 
 enum UserStatus {
