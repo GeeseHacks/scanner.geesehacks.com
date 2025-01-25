@@ -72,9 +72,9 @@ export async function POST(request: NextRequest) {
       return new NextResponse(JSON.stringify({ error: 'User not found' }), { status: 404 });
     }
 
-    const currentEventIds = user.attendedEventIds as string[] || [];
-
-    if (currentEventIds.includes(eventId)) {
+    const currentEventIds = user.attendedEventIds as number[] || [];
+    console.log(currentEventIds)
+    if (currentEventIds.includes(parseInt(eventId))) {
       return new NextResponse(JSON.stringify({ error: 'Event ID already recorded.' }), { status: 409 });
     }
 
