@@ -1,8 +1,32 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# GeeseHacks Scanner
+
+A mobile-first web application for managing hacker registrations and event check-ins at GeeseHacks. This application allows organizers to:
+
+- Link hacker profiles with their badge QR codes
+- Track event attendance through QR code scanning
+- Manage and verify hacker check-ins in real-time
+
+## Features
+
+- Mobile-optimized interface for easy scanning
+- QR code generation and scanning capabilities
+- Real-time attendance tracking
+- Secure hacker profile management
+- Event check-in system
 
 ## Getting Started
 
-First, run the development server:
+First, install the dependencies:
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
@@ -10,27 +34,33 @@ npm run dev
 yarn dev
 # or
 pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Technology Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+- [Next.js](https://nextjs.org/) - React framework for production
+- [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [QR Code Scanner](https://github.com/mebjas/html5-qrcode) - For badge scanning
 
-## Learn More
+## Development
 
-To learn more about Next.js, take a look at the following resources:
+The application is built with a mobile-first approach, ensuring optimal performance and user experience on mobile devices. The main components are:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `app/page.tsx` - Main scanner interface
+- `app/api/` - Backend API routes for data management
+- `components/` - Reusable UI components
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Deployment
 
-## Deploy on Vercel
+This application is deployed on [Vercel](https://vercel.com). The deployment is automatically handled through GitHub integration.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Contributing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is proprietary and confidential. All rights reserved.
